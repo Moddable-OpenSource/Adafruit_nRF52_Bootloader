@@ -508,7 +508,7 @@ int write_block (uint32_t block_no, uint8_t *data, WriteState *state)
               memcpy(&value, bl->data+i+4, 4);
 
               PRINTF("Bootloader ID = 0x%08lX and ", value);
-              if ( value == ((USB_DESC_VID << 16) | USB_DESC_UF2_PID) )
+              if ( value == (uint32_t)((USB_DESC_VID << 16) | USB_DESC_UF2_PID) )
               {
                 PRINTF("matches our VID/PID\r\n");
                 state->boot_id_matches = true;

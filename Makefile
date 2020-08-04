@@ -13,7 +13,10 @@ TUSB_PATH    = lib/tinyusb/src
 NRFX_PATH    = lib/nrfx
 SD_PATH      = lib/softdevice/$(SD_FILENAME)
 
-SD_VERSION   = 6.1.1
+# SD_VERSION   = 6.1.1
+# SD_FILENAME  = $(SD_NAME)_nrf52_$(SD_VERSION)
+# SD_HEX       = $(SD_PATH)/$(SD_FILENAME)_softdevice.hex
+SD_VERSION   = 7.0.1
 SD_FILENAME  = $(SD_NAME)_nrf52_$(SD_VERSION)
 SD_HEX       = $(SD_PATH)/$(SD_FILENAME)_softdevice.hex
 
@@ -22,8 +25,8 @@ MBR_HEX			 = lib/softdevice/mbr/hex/mbr_nrf52_2.4.1_mbr.hex
 # linker by MCU eg. nrf52840.ld
 LD_FILE      = linker/$(MCU_SUB_VARIANT).ld
 
-GIT_VERSION != git describe --dirty --always --tags
-GIT_SUBMODULE_VERSIONS != git submodule status | cut -d" " -f3,4 | paste -s -d" " -
+GIT_VERSION = $(shell git describe --dirty --always --tags)
+GIT_SUBMODULE_VERSIONS = $(shell git submodule status | cut -d" " -f3,4 | paste -s -d" " -)
 
 # compiled file name
 OUT_FILE = $(BOARD)_bootloader-$(GIT_VERSION)
@@ -159,6 +162,7 @@ C_SRC += $(TUSB_PATH)/device/usbd.c
 C_SRC += $(TUSB_PATH)/device/usbd_control.c
 C_SRC += $(TUSB_PATH)/class/cdc/cdc_device.c
 C_SRC += $(TUSB_PATH)/class/msc/msc_device.c
+C_SRC += $(TUSB_PATH)/class/vendor/vendor_device.c
 C_SRC += $(TUSB_PATH)/tusb.c
 
 endif

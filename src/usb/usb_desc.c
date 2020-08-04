@@ -30,7 +30,8 @@ enum {
     ITF_STR_PRODUCT      ,
     ITF_STR_SERIAL       ,
     ITF_STR_CDC          ,
-    ITF_STR_MSC
+    ITF_STR_MSC			 ,
+    ITF_STR_VENDOR
 };
 
 // CDC + MSC or CDC only mode
@@ -81,25 +82,29 @@ enum {
     ITF_NUM_CDC = 0  ,
     ITF_NUM_CDC_DATA ,
     ITF_NUM_MSC      ,
+    ITF_NUM_VENDOR   ,
     ITF_NUM_TOTAL
 };
 
 uint8_t const desc_configuration_cdc_msc[] =
 {
   // Interface count, string index, total length, attribute, power in mA
-  TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_MSC_DESC_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
+  TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_MSC_DESC_LEN + TUD_VENDOR_DESC_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
 
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
   TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, ITF_STR_CDC, 0x81, 8, 0x02, 0x82, 64),
 
   // Interface number, string index, EP Out & EP In address, EP size
   TUD_MSC_DESCRIPTOR(ITF_NUM_MSC, ITF_STR_MSC, 0x03, 0x83, 64),
+
+  // Interface number, string index, EP Out & IN address, EP size
+  TUD_MOD_VENDOR_DESCRIPTOR(ITF_NUM_VENDOR, ITF_STR_VENDOR, 0x04, 0x84, 64)
 };
 
 uint8_t const desc_configuration_cdc_only[] =
 {
   // Interface count, string index, total length, attribute, power in mA
-  TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL-1, 0, TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
+  TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL-2, 0, TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
 
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
   TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, ITF_STR_CDC, 0x81, 8, 0x02, 0x82, 64),
@@ -141,8 +146,9 @@ char const* string_desc_arr [] =
   BLEDIS_MANUFACTURER,           // 1: Manufacturer
   BLEDIS_MODEL,                  // 2: Product
   desc_str_serial,               // 3: Serials, should use chip ID
-  "nRF Serial",                  // 4: CDC Interface
-  "nRF UF2",                     // 5: MSC Interface
+  "Moddable Four Serial",        // 4: CDC Interface
+  "Moddable Four UF2",           // 5: MSC Interface
+  "Moddable Four Vendor",        // 6: Vendor Interface
 };
 
 // up to 64 unicode characters

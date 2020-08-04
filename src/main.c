@@ -115,6 +115,8 @@ void usb_teardown(void);
 #define DFU_DBL_RESET_DELAY             500
 #define DFU_DBL_RESET_MEM               0x20007F7C
 
+#define DFU_MODDABLE_MAGIC              0xbeefcafe
+
 #define BOOTLOADER_VERSION_REGISTER     NRF_TIMER2->CC[0]
 #define DFU_SERIAL_STARTUP_INTERVAL     1000
 
@@ -171,8 +173,11 @@ int main(void)
   // Serial only mode
   bool serial_only_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_SERIAL_ONLY_RESET);
 
+  // moddable dfu
+  bool moddable_dfu = ((*dbl_reset_mem) == DFU_MODDABLE_MAGIC);
+
   // start either serial, uf2 or ble
-  bool dfu_start = _ota_dfu || serial_only_dfu || (NRF_POWER->GPREGRET == DFU_MAGIC_UF2_RESET) ||
+  bool dfu_start = moddable_dfu || _ota_dfu || serial_only_dfu || (NRF_POWER->GPREGRET == DFU_MAGIC_UF2_RESET) ||
                     (((*dbl_reset_mem) == DFU_DBL_RESET_MAGIC) && (NRF_POWER->RESETREAS & POWER_RESETREAS_RESETPIN_Msk));
 
   // Clear GPREGRET if it is our values

@@ -31,11 +31,15 @@
 void usb_desc_init(bool cdc_only);
 
 #ifndef USB_DESC_VID
-#define USB_DESC_VID            0x239A
+//#define USB_DESC_VID            0x239A
+//#define USB_DESC_VID            0x1915
+#define USB_DESC_VID            0xbeef
 #endif
 
 #ifndef USB_DESC_UF2_PID
-#define USB_DESC_UF2_PID        0x0029
+//#define USB_DESC_UF2_PID        0x0029
+//#define USB_DESC_UF2_PID        0x520F
+#define USB_DESC_UF2_PID        0xcafe
 #endif
 
 #ifndef USB_DESC_CDC_ONLY_PID
