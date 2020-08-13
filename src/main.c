@@ -73,7 +73,7 @@
 #include "nrf_usbd.h"
 #include "tusb.h"
 
-void usb_init(bool cdc_only);
+void usb_init(bool cdc_only, char *debug);
 void usb_teardown(void);
 
 #else
@@ -152,12 +152,14 @@ void softdev_mbr_init(void)
   sd_mbr_command(&com);
 }
 
+char debug[50] = "";
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
 int main(void)
 {
   PRINTF("Bootlaoder Start\r\n");
+	char *p = debug;
 
   // Populate Boot Address and MBR Param into MBR if not already
   // MBR_BOOTLOADER_ADDR/MBR_PARAM_PAGE_ADDR are used if available, else UICR registers are used
@@ -166,19 +168,24 @@ int main(void)
 
   // SD is already Initialized in case of BOOTLOADER_DFU_OTA_MAGIC
   bool sd_inited = (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_APPJUM);
+if (sd_inited) *p++ = 'A';
 
   // Start Bootloader in BLE OTA mode
   _ota_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_APPJUM) || (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_RESET);
+if (_ota_dfu) *p++ = 'B';
 
   // Serial only mode
   bool serial_only_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_SERIAL_ONLY_RESET);
+if (serial_only_dfu) *p++ = 'C';
 
   // moddable dfu
   bool moddable_dfu = ((*dbl_reset_mem) == DFU_MODDABLE_MAGIC);
+if (moddable_dfu) *p++ = 'M';
 
   // start either serial, uf2 or ble
   bool dfu_start = moddable_dfu || _ota_dfu || serial_only_dfu || (NRF_POWER->GPREGRET == DFU_MAGIC_UF2_RESET) ||
                     (((*dbl_reset_mem) == DFU_DBL_RESET_MAGIC) && (NRF_POWER->RESETREAS & POWER_RESETREAS_RESETPIN_Msk));
+if (dfu_start) *p++ = 'D';
 
   // Clear GPREGRET if it is our values
   if (dfu_start) NRF_POWER->GPREGRET = 0;
@@ -206,12 +213,15 @@ int main(void)
   /*------------- Determine DFU mode (Serial, OTA, FRESET or normal) -------------*/
   // DFU button pressed
   dfu_start  = dfu_start || button_pressed(BUTTON_DFU);
+if (button_pressed(BUTTON_DFU)) *p++ = 'E';
 
   // DFU + FRESET are pressed --> OTA
   _ota_dfu = _ota_dfu  || ( button_pressed(BUTTON_DFU) && button_pressed(BUTTON_FRESET) ) ;
 
   bool const valid_app = bootloader_app_is_valid();
+if (valid_app) *p++ = 'F';
   bool const just_start_app = valid_app && !dfu_start && (*dbl_reset_mem) == DFU_DBL_RESET_APP;
+if (just_start_app) *p++ = 'G';
 
   if (!just_start_app && APP_ASKS_FOR_SINGLE_TAP_RESET())
     dfu_start = 1;
@@ -252,7 +262,10 @@ int main(void)
     else
     {
       led_state(STATE_USB_UNMOUNTED);
-      usb_init(serial_only_dfu);
+*p++ = '\r';
+*p++ = '\n';
+*p++ = 0;
+      usb_init(serial_only_dfu, debug);
     }
 
     // Initiate an update of the firmware.

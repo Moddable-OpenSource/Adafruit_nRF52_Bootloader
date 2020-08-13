@@ -241,8 +241,9 @@ static inline bool in_uicr_space(uint32_t addr)
 //
 //--------------------------------------------------------------------+
 
-void uf2_init(void)
+void uf2_init(char *debug)
 {
+  strcat(infoUf2File, debug);
   strcat(infoUf2File, "SoftDevice: ");
 
   if ( is_sd_existed() )

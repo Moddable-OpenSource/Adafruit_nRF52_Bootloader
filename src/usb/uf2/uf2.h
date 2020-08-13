@@ -79,6 +79,6 @@ typedef struct {
     uint32_t magicEnd;
 } UF2_Block;
 
-void uf2_init(void);
+void uf2_init(char *debug);
 
 #endif
