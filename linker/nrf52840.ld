@@ -25,14 +25,20 @@ MEMORY
 
   /** RAM Region for bootloader. */
   /* Avoid conflict with NOINIT for OTA bond sharing */
-  RAM (rwx) :  ORIGIN = 0x20008000, LENGTH = 0x20040000-0x20008000
+/*  RAM (rwx) :  ORIGIN = 0x20008000, LENGTH = 0x20040000-0x20008000 */
+/* @MODDABLE - match Ram layout */
+  RAM (rwx) :  ORIGIN = 0x20004200, LENGTH = 0x20040000-0x20004200
 
   /* Location for double reset detection, no init */
-  DBL_RESET (rwx) :  ORIGIN = 0x20007F7C, LENGTH = 0x04
+/*  DBL_RESET (rwx) :  ORIGIN = 0x20007F7C, LENGTH = 0x04	*/
+/* @MODDABLE - move DBL_RESET	*/
+  DBL_RESET (rwx) :  ORIGIN = 0x200041FC, LENGTH = 0x04
   
   /** Location of non initialized RAM. Non initialized RAM is used for exchanging bond information
    *  from application to bootloader when using buttonless DFU OTA. */
-  NOINIT (rwx) :  ORIGIN = 0x20007F80, LENGTH = 0x80
+/*  NOINIT (rwx) :  ORIGIN = 0x20007F80, LENGTH = 0x80		*/
+/* @MODDABLE - move to match new M4 layout		*/
+  NOINIT (rwx) :  ORIGIN = 0x20004180, LENGTH = 0x80
   
   
   

@@ -368,10 +368,13 @@ $(BUILD)/$(OUT_FILE)-nosd.hex: $(BUILD)/$(OUT_FILE).hex
 	@echo Create $(notdir $@)
 	@python3 tools/hexmerge.py --overlap=replace -o $@ $< $(MBR_HEX)
 
-# Bootolader only uf2
+# Bootloader only uf2
 $(BUILD)/$(OUT_FILE)-nosd.uf2: $(BUILD)/$(OUT_FILE)-nosd.hex
 	@echo Create $(notdir $@)
 	@python3 lib/uf2/utils/uf2conv.py -f 0xd663823c -c -o $@ $^
+
+bootloaderuf2: $(BUILD)/$(OUT_FILE)-nosd.uf2
+	@echo Bootloader file at $(BUILD)/$(OUT_FILE)-nosd.uf2
 
 # merge bootloader and sd hex together
 $(BUILD)/$(MERGED_FILE).hex: $(BUILD)/$(OUT_FILE).hex

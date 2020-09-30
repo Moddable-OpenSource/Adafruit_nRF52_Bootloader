@@ -113,7 +113,8 @@ void usb_teardown(void);
 #define DFU_DBL_RESET_MAGIC             0x5A1AD5      // SALADS
 #define DFU_DBL_RESET_APP               0x4ee5677e
 #define DFU_DBL_RESET_DELAY             500
-#define DFU_DBL_RESET_MEM               0x20007F7C
+// #define DFU_DBL_RESET_MEM               0x20007F7C
+#define DFU_DBL_RESET_MEM               0x200041FC
 
 #define DFU_MODDABLE_MAGIC              0xbeefcafe
 
