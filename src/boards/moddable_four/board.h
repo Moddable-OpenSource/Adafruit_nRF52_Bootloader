@@ -42,6 +42,22 @@
 #define BUTTON_2            24		// random pin
 #define BUTTON_PULL         NRF_GPIO_PIN_PULLUP
 
+/*------------------------------------------------------------------*/
+/* QSPI
+ *------------------------------------------------------------------*/
+// #define USE_QSPI_XIP		1
+
+#define USE_QSPI	0
+
+#define QSPI_SCK_PIN   		NRF_GPIO_PIN_MAP(1,1)
+#define QSPI_CSN_PIN   		NRF_GPIO_PIN_MAP(1,2)
+#define QSPI_IO0_PIN   		NRF_GPIO_PIN_MAP(1,3)
+#define QSPI_IO1_PIN   		NRF_GPIO_PIN_MAP(1,4)
+#define QSPI_IO2_PIN   		NRF_GPIO_PIN_MAP(1,5)
+#define QSPI_IO3_PIN   		NRF_GPIO_PIN_MAP(1,6)
+
+#define QSPI_XIP_START_ADDR      0x12000000
+
 //--------------------------------------------------------------------+
 // BLE OTA
 //--------------------------------------------------------------------+

@@ -2,6 +2,8 @@
 #include <boards.h>
 //#include "ftdi_trace.h"
 
+#if USE_QSPI
+
 #define QSPI_STD_CMD_WRSR        0x01
 #define QSPI_STD_CMD_RSTEN       0x66
 #define QSPI_STD_CMD_RST         0x99
@@ -107,3 +109,9 @@ void setup_qspi(void)
 	reset_handler();
 */
 }
+
+#else
+void setup_qspi(void) {
+}
+
+#endif
