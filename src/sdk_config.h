@@ -83,6 +83,22 @@
 #define UART0_ENABLED                      1
 #define UART0_CONFIG_USE_EASY_DMA          0
 
+#define NRF_UARTE_ENABLED					1
+#define NRFX_UARTE_ENABLED 1
+#define NRFX_UARTE_PRESENT
+#define NRFX_UARTE0_INST_IDX				0
+#define UART0_USE_EASY_DMA				true
+
+#define NRFX_QSPI_ENABLED		1
+#define NRFX_QSPI_CONFIG_IRQ_PRIORITY 6
+#define QSPI_XIP_START_ADDR      0x12000000
+#define NRFX_QSPI_CONFIG_SCK_DELAY 0x80
+// #define NRFX_QSPI_CONFIG_READOC		4		// Read4IO
+// #define NRFX_QSPI_CONFIG_WRITEOC	3		// PP4IO
+// #define NRFX_QSPI_CONFIG_ADDRMODE	0		// 24bit
+// #define NRFX_QSPI_CONFIG_MODE		0		// Mode 0
+// #define NRFX_QSPI_CONFIG_FREQUENCY	0		// (divider - 32MHz)
+
 
 //==========================================================
 // <e> APP_UART_ENABLED - app_uart - UART driver

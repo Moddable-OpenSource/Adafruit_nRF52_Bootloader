@@ -67,7 +67,7 @@
 // Buffer size for each read/write transfer, the more the better
 #define CFG_TUD_MSC_BUFSIZE         (4*1024)
 
-#define CFG_TUD_VENDOR_RX_BUFSIZE	4096		// 512, 128 (1:04), 64 (1:08)
+#define CFG_TUD_VENDOR_RX_BUFSIZE	3*1024		// 512, 128 (1:04), 64 (1:08)
 #define CFG_TUD_VENDOR_TX_BUFSIZE	1024
 
 #define CFG_TUD_VENDOR_SUBCLASS		3

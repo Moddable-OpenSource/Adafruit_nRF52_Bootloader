@@ -125,11 +125,13 @@ static void wait_for_events(void)
     app_sched_execute();
 
 #ifdef NRF_USBD
+extern void tud_vendor_task(void);
     // skip if usb is not inited ( e.g OTA / finializing sd/bootloader )
     if ( tusb_inited() )
     {
       tud_task();
       tud_cdc_write_flush();
+		tud_vendor_task();
     }
 #endif
 
@@ -200,6 +202,9 @@ static void bootloader_settings_save(bootloader_settings_t * p_settings)
   }
 }
 
+void mySaveBL(bootloader_settings_t *set) {
+	bootloader_settings_save(set);
+}
 
 void bootloader_dfu_update_process(dfu_update_status_t update_status)
 {
@@ -369,15 +374,23 @@ void bootloader_app_start(void)
   if ( is_sd_existed() )
   {
     PRINTF("SoftDevice exist\r\n");
+#if defined(USE_QSPI_XIP)
+	app_addr = QSPI_XIP_START_ADDR;
+#else
     // App starts after SoftDevice
     app_addr = SD_SIZE_GET(MBR_SIZE);
+#endif
     fwd_ret = sd_softdevice_vector_table_base_set(app_addr);
   }else
   {
     PRINTF("SoftDevice not exist\r\n");
 
+#if defined (USE_QSPI_XIP)
+    app_addr = QSPI_XIP_START_ADDR;
+#else
     // App starts right after MBR
     app_addr = MBR_SIZE;
+#endif
     sd_mbr_command_t command =
     {
       .command = SD_MBR_COMMAND_IRQ_FORWARD_ADDRESS_SET,

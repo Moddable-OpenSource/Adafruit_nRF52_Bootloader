@@ -46,4 +46,13 @@ void usb_desc_init(bool cdc_only);
 #define USB_DESC_CDC_ONLY_PID   0x002A
 #endif
 
+// Interface number, string index, EP Out & IN address, EP size
+#define TUD_MOD_VENDOR_DESCRIPTOR(_itfnum, _stridx, _epout, _epin, _epsize) \
+    /* Interface */\
+    9, TUSB_DESC_INTERFACE, _itfnum, 0, 2, TUSB_CLASS_VENDOR_SPECIFIC, CFG_TUD_VENDOR_SUBCLASS, 0x00, _stridx,\
+    /* Endpoint Out */\
+    7, TUSB_DESC_ENDPOINT, _epout, TUSB_XFER_BULK, U16_TO_U8S_LE(_epsize), 0,\
+    /* Endpoint In */\
+    7, TUSB_DESC_ENDPOINT, _epin, TUSB_XFER_BULK, U16_TO_U8S_LE(_epsize), 0
+
 #endif /* USB_DESC_H_ */

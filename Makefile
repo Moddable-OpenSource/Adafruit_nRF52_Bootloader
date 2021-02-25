@@ -116,6 +116,9 @@ C_SRC += $(NRFX_PATH)/drivers/src/nrfx_power.c
 C_SRC += $(NRFX_PATH)/drivers/src/nrfx_nvmc.c
 C_SRC += $(NRFX_PATH)/mdk/system_$(MCU_SUB_VARIANT).c
 
+# qspi
+C_SRC += $(NRFX_PATH)/drivers/src/nrfx_qspi.c
+
 # SDK 11 files: serial + OTA DFU
 C_SRC += $(SDK11_PATH)/libraries/bootloader_dfu/bootloader.c
 C_SRC += $(SDK11_PATH)/libraries/bootloader_dfu/bootloader_settings.c
@@ -375,6 +378,8 @@ $(BUILD)/$(OUT_FILE)-nosd.uf2: $(BUILD)/$(OUT_FILE)-nosd.hex
 
 bootloaderuf2: $(BUILD)/$(OUT_FILE)-nosd.uf2
 	@echo Bootloader file at $(BUILD)/$(OUT_FILE)-nosd.uf2
+	@cp $(BUILD)/$(OUT_FILE)-nosd.uf2 current.uf2
+	@echo  	and current.uf2
 
 # merge bootloader and sd hex together
 $(BUILD)/$(MERGED_FILE).hex: $(BUILD)/$(OUT_FILE).hex

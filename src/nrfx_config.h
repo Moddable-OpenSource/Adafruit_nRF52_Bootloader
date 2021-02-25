@@ -16,6 +16,22 @@
 #define NRFX_PWM2_ENABLED   0
 #define NRFX_PWM3_ENABLED   0
 
+// modbrin
+#define NRFX_UART_ENABLED	1
+#define NRFX_UART0_ENABLED  1
+#define NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY 7
+
+#define NRFX_QSPI_ENABLED	1
+#define NRFX_QSPI_DEFAULT_CONFIG_IRQ_PRIORITY 6
+#define QSPI_XIP_START_ADDR      0x12000000
+
+#define NRFX_QSPI_CONFIG_SCK_DELAY 0x80
+#define NRFX_QSPI_CONFIG_READOC     4       // Read4IO
+#define NRFX_QSPI_CONFIG_WRITEOC    3       // PP4IO
+#define NRFX_QSPI_CONFIG_ADDRMODE   0       // 24bit
+#define NRFX_QSPI_CONFIG_MODE       0       // Mode 0
+#define NRFX_QSPI_CONFIG_FREQUENCY  0       // (divider - 32MHz)
+
 // UART
 #ifdef NRF52832_XXAA
 

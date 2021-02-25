@@ -35,7 +35,9 @@ enum {
 };
 
 // CDC + MSC or CDC only mode
-static bool _cdc_only = false;
+// static bool _cdc_only = false;
+
+static bool _vendor_only = false;
 
 // Serial is 64-bit DeviceID -> 16 chars len
 static char desc_str_serial[1+16];
@@ -81,8 +83,8 @@ uint8_t const * tud_descriptor_device_cb(void)
 enum {
 //    ITF_NUM_CDC = 0  ,
 //    ITF_NUM_CDC_DATA ,
-    ITF_NUM_MSC      ,
     ITF_NUM_VENDOR   ,
+    ITF_NUM_MSC      ,
     ITF_NUM_TOTAL
 };
 
@@ -95,13 +97,20 @@ uint8_t const desc_configuration_cdc_msc[] =
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
 //  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, ITF_STR_CDC, 0x81, 8, 0x02, 0x82, 64),
 
-  // Interface number, string index, EP Out & EP In address, EP size
-  TUD_MSC_DESCRIPTOR(ITF_NUM_MSC, ITF_STR_MSC, 0x03, 0x83, 64),
-
   // Interface number, string index, EP Out & IN address, EP size
-  TUD_MOD_VENDOR_DESCRIPTOR(ITF_NUM_VENDOR, ITF_STR_VENDOR, 0x04, 0x84, 64)
+  TUD_MOD_VENDOR_DESCRIPTOR(ITF_NUM_VENDOR, ITF_STR_VENDOR, 0x04, 0x84, 64),
+
+  // Interface number, string index, EP Out & EP In address, EP size
+  TUD_MSC_DESCRIPTOR(ITF_NUM_MSC, ITF_STR_MSC, 0x03, 0x83, 64)
 };
 
+uint8_t const desc_configuration_vendor_only[] =
+{
+	TUD_CONFIG_DESCRIPTOR(1, 1, 0, TUD_CONFIG_DESC_LEN + TUD_VENDOR_DESC_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
+	TUD_MOD_VENDOR_DESCRIPTOR(0, ITF_STR_VENDOR, 0x01, 0x81, 64)
+};
+
+/*
 uint8_t const desc_configuration_cdc_only[] =
 {
   // Interface count, string index, total length, attribute, power in mA
@@ -110,6 +119,7 @@ uint8_t const desc_configuration_cdc_only[] =
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
 //  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, ITF_STR_CDC, 0x81, 8, 0x02, 0x82, 64),
 };
+*/
 
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -118,22 +128,31 @@ uint8_t const desc_configuration_cdc_only[] =
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
 {
   (void) index; // for multiple configurations
-  return _cdc_only ? desc_configuration_cdc_only : desc_configuration_cdc_msc;
+//  return _cdc_only ? desc_configuration_cdc_only : desc_configuration_cdc_msc;
+  return _vendor_only ? desc_configuration_vendor_only : desc_configuration_cdc_msc;
 }
 
 // Enumerate as CDC + MSC or CDC only
 void usb_desc_init(bool cdc_only)
 {
-  _cdc_only = cdc_only;
+//  _cdc_only = cdc_only;
+	_vendor_only = cdc_only;
 
+/*
   if ( cdc_only )
   {
     // Change PID to CDC only
     desc_device.idProduct = USB_DESC_CDC_ONLY_PID;
   }
+*/
 
   // Create Serial string descriptor
-  sprintf(desc_str_serial, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);
+//  sprintf(desc_str_serial, "%08lX%08lX", NRF_FICR->DEVICEID[1], NRF_FICR->DEVICEID[0]);
+	{ 	// do it like app_usbd_serial_num.c in nordic
+		uint16_t serial_high = (uint16_t)NRF_FICR->DEVICEADDR[1] | 0XC000;
+		uint32_t serial_low = NRF_FICR->DEVICEADDR[0];
+	  sprintf(desc_str_serial, "%04X%08lX", serial_high, serial_low);
+	}
 }
 
 //--------------------------------------------------------------------+

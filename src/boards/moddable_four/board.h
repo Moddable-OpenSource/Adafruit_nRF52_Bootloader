@@ -30,7 +30,7 @@
  *------------------------------------------------------------------*/
 #define LEDS_NUMBER         1
 #define LED_PRIMARY_PIN     7
-//#define LED_SECONDARY_PIN   14
+#define LED_SECONDARY_PIN   7
 #define LED_STATE_ON        0
 
 /*------------------------------------------------------------------*/
@@ -46,7 +46,7 @@
 // BLE OTA
 //--------------------------------------------------------------------+
 #define BLEDIS_MANUFACTURER    "Moddable Tech, Inc."
-#define BLEDIS_MODEL           "Moddable Four (bootloader)"
+#define BLEDIS_MODEL           "Moddable Four"
 
 //--------------------------------------------------------------------+
 // USB

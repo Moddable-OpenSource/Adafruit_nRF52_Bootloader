@@ -47,6 +47,7 @@
 #include "sdk_common.h"
 #include "dfu_transport.h"
 #include "bootloader.h"
+#include "bootloader_types.h"
 #include "bootloader_util.h"
 
 #include "nrf.h"
@@ -117,6 +118,7 @@ void usb_teardown(void);
 #define DFU_DBL_RESET_MEM               0x200041FC
 
 #define DFU_MODDABLE_MAGIC              0xbeefcafe
+#define DFU_MODDABLE_VENDOR_MAGIC       0xf00dcafe
 
 #define BOOTLOADER_VERSION_REGISTER     NRF_TIMER2->CC[0]
 #define DFU_SERIAL_STARTUP_INTERVAL     1000
@@ -140,6 +142,9 @@ uint32_t* dbl_reset_mem = ((uint32_t*)  DFU_DBL_RESET_MEM );
 // true if ble, false if serial
 bool _ota_dfu = false;
 bool _ota_connected = false;
+
+void mySaveBL(bootloader_settings_t *set);
+void setup_qspi();
 
 bool is_ota(void)
 {
@@ -176,8 +181,9 @@ if (sd_inited) *p++ = 'A';
 if (_ota_dfu) *p++ = 'B';
 
   // Serial only mode
-  bool serial_only_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_SERIAL_ONLY_RESET);
-if (serial_only_dfu) *p++ = 'C';
+//  bool serial_only_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_SERIAL_ONLY_RESET);
+	bool serial_only_dfu = ((*dbl_reset_mem) == DFU_MODDABLE_VENDOR_MAGIC);
+	if (serial_only_dfu) *p++ = 'V';
 
   // moddable dfu
   bool moddable_dfu = ((*dbl_reset_mem) == DFU_MODDABLE_MAGIC);
@@ -197,6 +203,9 @@ if (dfu_start) *p++ = 'D';
 
   board_init();
   bootloader_init();
+
+	// get qspi flash up and running
+	setup_qspi();
 
   led_state(STATE_BOOTLOADER_STARTED);
 
@@ -219,8 +228,25 @@ if (button_pressed(BUTTON_DFU)) *p++ = 'E';
   // DFU + FRESET are pressed --> OTA
   _ota_dfu = _ota_dfu  || ( button_pressed(BUTTON_DFU) && button_pressed(BUTTON_FRESET) ) ;
 
-  bool const valid_app = bootloader_app_is_valid();
-if (valid_app) *p++ = 'F';
+//  bool const valid_app = bootloader_app_is_valid();
+  bool valid_app = bootloader_app_is_valid();
+
+	if (!valid_app) {
+		bootloader_settings_t myBST;
+		myBST.bank_0 = 1;
+		myBST.bank_0_crc = 0;
+		myBST.bank_0_size = 0;
+		myBST.bank_1 = 255;
+		myBST.sd_image_size = 0;
+		myBST.bl_image_size = 0;
+		myBST.app_image_size = 0;
+		myBST.sd_image_start = 0;
+
+		mySaveBL(&myBST);
+
+		valid_app = 1;
+	}
+
   bool const just_start_app = valid_app && !dfu_start && (*dbl_reset_mem) == DFU_DBL_RESET_APP;
 if (just_start_app) *p++ = 'G';
 
@@ -262,7 +288,7 @@ if (just_start_app) *p++ = 'G';
     }
     else
     {
-      led_state(STATE_USB_UNMOUNTED);
+      led_state(STATE_USB_MOUNTED);
 *p++ = '\r';
 *p++ = '\n';
 *p++ = 0;
