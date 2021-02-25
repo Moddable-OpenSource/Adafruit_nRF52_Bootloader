@@ -2028,7 +2028,9 @@ SVCALL(SD_BLE_GAP_DISCONNECT, uint32_t, sd_ble_gap_disconnect(uint16_t conn_hand
  *                     - For all other roles handle is ignored.
  * @param[in] tx_power Radio transmit power in dBm (see note for accepted values).
  *
-  * @note Supported tx_power values: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 0dBm, +2dBm, +3dBm, +4dBm, +5dBm, +6dBm, +7dBm and +8dBm.
+ * @note Supported tx_power values: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 0dBm, +3dBm and +4dBm.
+  *       In addition, on some chips following values are supported: +2dBm, +5dBm, +6dBm, +7dBm and +8dBm.
+ *       Setting these values on a chip that does not support them will result in undefined behaviour.
   * @note The initiator will have the same transmit power as the scanner.
  * @note When a connection is created it will inherit the transmit power from the initiator or
  *       advertiser leading to the connection.
