@@ -74,7 +74,7 @@
 #include "nrf_usbd.h"
 #include "tusb.h"
 
-void usb_init(bool cdc_only, char *debug);
+void usb_init(bool cdc_only);
 void usb_teardown(void);
 
 #else
@@ -83,6 +83,9 @@ void usb_teardown(void);
 #define usb_teardown()
 
 #endif
+
+#include "dfu_qspi.h"
+#include "dfu_uart.h"
 
 //--------------------------------------------------------------------+
 //
@@ -119,6 +122,7 @@ void usb_teardown(void);
 
 #define DFU_MODDABLE_MAGIC              0xbeefcafe
 #define DFU_MODDABLE_VENDOR_MAGIC       0xf00dcafe
+//#define DFU_MODDABLE_SERIAL_MAGIC       0x347f00d5
 
 #define BOOTLOADER_VERSION_REGISTER     NRF_TIMER2->CC[0]
 #define DFU_SERIAL_STARTUP_INTERVAL     1000
@@ -143,8 +147,9 @@ uint32_t* dbl_reset_mem = ((uint32_t*)  DFU_DBL_RESET_MEM );
 bool _ota_dfu = false;
 bool _ota_connected = false;
 
+bool _serial_update = false;
+
 void mySaveBL(bootloader_settings_t *set);
-void setup_qspi();
 
 bool is_ota(void)
 {
@@ -158,14 +163,40 @@ void softdev_mbr_init(void)
   sd_mbr_command(&com);
 }
 
-char debug[50] = "";
+/*
+static inline void wait_for_flash_ready(void) {
+	while (NRF_NVMC->READY == NVMC_READY_READY_Busy) {;}
+}
+
+void nrf_nvmc_write_word(uint32_t address, uint32_t value) {
+	// Enable write
+	NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen;
+	__ISB();
+	__DSB();
+	*(uint32_t*)address = value;
+	wait_for_flash_ready();
+	NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren;
+	__ISB();
+	__DSB();
+}
+
+void powerCheck() {
+	if (NRF_UICR->REGOUT0 == 0xffffffff) {
+		nrf_nvmc_write_word((uint32_t)&NRF_UICR->REGOUT0,
+			UICR_REGOUT0_VOUT_3V3 << UICR_REGOUT0_VOUT_Pos);
+		NVIC_SystemReset();
+	}
+}
+*/
+
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
 int main(void)
 {
-  PRINTF("Bootlaoder Start\r\n");
-	char *p = debug;
+  PRINTF("Bootloader Start\r\n");
+
+//	powerCheck();
 
   // Populate Boot Address and MBR Param into MBR if not already
   // MBR_BOOTLOADER_ADDR/MBR_PARAM_PAGE_ADDR are used if available, else UICR registers are used
@@ -174,25 +205,20 @@ int main(void)
 
   // SD is already Initialized in case of BOOTLOADER_DFU_OTA_MAGIC
   bool sd_inited = (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_APPJUM);
-if (sd_inited) *p++ = 'A';
 
   // Start Bootloader in BLE OTA mode
   _ota_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_APPJUM) || (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_RESET);
-if (_ota_dfu) *p++ = 'B';
 
   // Serial only mode
 //  bool serial_only_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_SERIAL_ONLY_RESET);
 	bool serial_only_dfu = ((*dbl_reset_mem) == DFU_MODDABLE_VENDOR_MAGIC);
-	if (serial_only_dfu) *p++ = 'V';
 
   // moddable dfu
   bool moddable_dfu = ((*dbl_reset_mem) == DFU_MODDABLE_MAGIC);
-if (moddable_dfu) *p++ = 'M';
 
   // start either serial, uf2 or ble
   bool dfu_start = moddable_dfu || _ota_dfu || serial_only_dfu || (NRF_POWER->GPREGRET == DFU_MAGIC_UF2_RESET) ||
                     (((*dbl_reset_mem) == DFU_DBL_RESET_MAGIC) && (NRF_POWER->RESETREAS & POWER_RESETREAS_RESETPIN_Msk));
-if (dfu_start) *p++ = 'D';
 
   // Clear GPREGRET if it is our values
   if (dfu_start) NRF_POWER->GPREGRET = 0;
@@ -204,8 +230,15 @@ if (dfu_start) *p++ = 'D';
   board_init();
   bootloader_init();
 
+#if USE_DFU_UART
+	_serial_update = ((*dbl_reset_mem) == DFU_MODDABLE_SERIAL_MAGIC) || button_pressed(BUTTON_5);
+	if (_serial_update)
+		dfu_start = true;
+#endif
+
 	// get qspi flash up and running
-	setup_qspi();
+	setup_qspi(_serial_update);			// writable?
+
 
   led_state(STATE_BOOTLOADER_STARTED);
 
@@ -223,7 +256,6 @@ if (dfu_start) *p++ = 'D';
   /*------------- Determine DFU mode (Serial, OTA, FRESET or normal) -------------*/
   // DFU button pressed
   dfu_start  = dfu_start || button_pressed(BUTTON_DFU);
-if (button_pressed(BUTTON_DFU)) *p++ = 'E';
 
   // DFU + FRESET are pressed --> OTA
   _ota_dfu = _ota_dfu  || ( button_pressed(BUTTON_DFU) && button_pressed(BUTTON_FRESET) ) ;
@@ -248,7 +280,6 @@ if (button_pressed(BUTTON_DFU)) *p++ = 'E';
 	}
 
   bool const just_start_app = valid_app && !dfu_start && (*dbl_reset_mem) == DFU_DBL_RESET_APP;
-if (just_start_app) *p++ = 'G';
 
   if (!just_start_app && APP_ASKS_FOR_SINGLE_TAP_RESET())
     dfu_start = 1;
@@ -289,10 +320,14 @@ if (just_start_app) *p++ = 'G';
     else
     {
       led_state(STATE_USB_MOUNTED);
-*p++ = '\r';
-*p++ = '\n';
-*p++ = 0;
-      usb_init(serial_only_dfu, debug);
+#if USE_DFU_UART
+		if (_serial_update) {
+  			led_state(STATE_WRITING_STARTED);	// blink fast
+			setup_uart();
+		}
+		else
+#endif
+   		   usb_init(serial_only_dfu);
     }
 
     // Initiate an update of the firmware.

@@ -51,7 +51,7 @@ void USBD_IRQHandler(void)
 }
 
 //------------- IMPLEMENTATION -------------//
-void usb_init(bool cdc_only, char *debug)
+void usb_init(bool cdc_only)
 {
   // 0, 1 is reserved for SD
   NVIC_SetPriority(USBD_IRQn, 2);
@@ -99,7 +99,7 @@ void usb_init(bool cdc_only, char *debug)
 
   usb_desc_init(cdc_only);
 
-  uf2_init(debug);
+  uf2_init();
 
   // Init TinyUSB stack
   tusb_init();

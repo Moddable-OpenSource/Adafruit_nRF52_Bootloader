@@ -64,6 +64,9 @@ void board_init(void)
 
   button_init(BUTTON_DFU);
   button_init(BUTTON_FRESET);
+#if defined(BUTTON_5)
+  button_init(BUTTON_5);
+#endif
   NRFX_DELAY_US(100); // wait for the pin state is stable
 
   // use PMW0 for LED RED

@@ -114,6 +114,7 @@ C_SRC += $(wildcard src/boards/$(BOARD)/*.c)
 # nrfx
 C_SRC += $(NRFX_PATH)/drivers/src/nrfx_power.c
 C_SRC += $(NRFX_PATH)/drivers/src/nrfx_nvmc.c
+C_SRC += $(NRFX_PATH)/drivers/src/nrfx_uart.c
 C_SRC += $(NRFX_PATH)/mdk/system_$(MCU_SUB_VARIANT).c
 
 # qspi
@@ -155,6 +156,7 @@ IPATH += $(SDK_PATH)/drivers_nrf/uart
 else
 
 # USB Application ( MSC + UF2 )
+C_SRC += $(wildcard src/fifo/*.c)
 C_SRC += $(wildcard src/usb/*.c)
 C_SRC += $(wildcard src/usb/uf2/*.c)
 
@@ -186,6 +188,8 @@ IPATH += src/boards/$(BOARD)
 IPATH += src/cmsis/include
 IPATH += src/usb
 IPATH += $(TUSB_PATH)
+IPATH += src/fifo
+IPATH += src/usb/uf2
 
 # nrfx
 IPATH += $(NRFX_PATH)
@@ -228,6 +232,8 @@ ifeq ($(DEBUG), 1)
 endif
 
 #flags common to all targets
+# -ggdb
+
 CFLAGS += \
 	-mthumb \
 	-mabi=aapcs \

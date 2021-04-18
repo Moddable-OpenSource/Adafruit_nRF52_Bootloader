@@ -81,7 +81,7 @@
 #define UART_CONFIG_LOG_ENABLED            0
 
 #define UART0_ENABLED                      1
-#define UART0_CONFIG_USE_EASY_DMA          0
+#define UART0_CONFIG_USE_EASY_DMA          1		// 0
 
 #define NRF_UARTE_ENABLED					1
 #define NRFX_UARTE_ENABLED 1
@@ -135,6 +135,7 @@
 #define CRC16_ENABLED                      1
 #define NRF_STRERROR_ENABLED               1
 
+#define APP_FIFO_ENABLED		1
 
 #endif //SDK_CONFIG_H
 

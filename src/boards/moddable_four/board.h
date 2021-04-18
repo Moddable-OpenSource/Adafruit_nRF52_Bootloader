@@ -47,7 +47,8 @@
  *------------------------------------------------------------------*/
 // #define USE_QSPI_XIP		1
 
-#define USE_QSPI	0
+#define USE_QSPI		0
+#define USE_DFU_UART	0
 
 #define QSPI_SCK_PIN   		NRF_GPIO_PIN_MAP(1,1)
 #define QSPI_CSN_PIN   		NRF_GPIO_PIN_MAP(1,2)

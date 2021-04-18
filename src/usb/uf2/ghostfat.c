@@ -35,6 +35,10 @@
 #include "bootloader_settings.h"
 #include "bootloader.h"
 
+#include "dfu_qspi.h"
+//void qspi_write(uint32_t dst, void const *src, int len, bool need_erase);
+//void qspi_flush(bool need_erase);
+
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
@@ -241,9 +245,8 @@ static inline bool in_uicr_space(uint32_t addr)
 //
 //--------------------------------------------------------------------+
 
-void uf2_init(char *debug)
+void uf2_init()
 {
-  strcat(infoUf2File, debug);
   strcat(infoUf2File, "SoftDevice: ");
 
   if ( is_sd_existed() )
@@ -383,6 +386,7 @@ void read_block(uint32_t block_no, uint8_t *data) {
  * 512 : write is successful (BPB_SECTOR_SIZE == 512)
  *   0 : is busy with flashing, tinyusb stack will call write_block again with the same parameters later on
  */
+static uint32_t lastDst = 0;
 int write_block (uint32_t block_no, uint8_t *data, WriteState *state)
 {
   UF2_Block *bl = (void*) data;
@@ -416,7 +420,19 @@ int write_block (uint32_t block_no, uint8_t *data, WriteState *state)
       {
         PRINTF("Write addr = 0x%08lX, block = %ld (%ld of %ld)\r\n", bl->targetAddr, bl->blockNo, state->numWritten, bl->numBlocks);
         flash_nrf5x_write(bl->targetAddr, bl->data, bl->payloadSize, true);
-      }else if ( bl->targetAddr < USER_FLASH_START )
+		lastDst = bl->targetAddr;
+      }
+#if USE_QSPI
+	else if ( bl->targetAddr >= QSPI_XIP_START_ADDR )
+		{
+		if (in_app_space(lastDst))
+	        flash_nrf5x_flush(true);
+		
+        qspi_write(bl->targetAddr, bl->data, bl->payloadSize, true);
+		lastDst = bl->targetAddr;
+	}
+#endif
+		else if ( bl->targetAddr < USER_FLASH_START )
       {
         // do nothing if writing to MBR, occurs when SD hex is included
         // keep going as successful write
@@ -579,7 +595,12 @@ int write_block (uint32_t block_no, uint8_t *data, WriteState *state)
       // TODO numWritten can be smaller than numBlocks if return early
       if ( state->numWritten >= state->numBlocks )
       {
-        flash_nrf5x_flush(true);
+		if (in_app_space(lastDst))
+	        flash_nrf5x_flush(true);
+#if USE_QSPI
+		else
+			qspi_flush(true);
+#endif
 
         // Failed if update bootloader without UCIR value
         if ( state->update_bootloader && !state->has_uicr )

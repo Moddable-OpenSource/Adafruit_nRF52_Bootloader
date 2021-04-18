@@ -35,6 +35,7 @@
 #ifdef NRF_USBD
 #include "tusb.h"
 #endif
+extern void dfu_uart_task(void);
 
 /**@brief Enumeration for specifying current bootloader status.
  */
@@ -133,6 +134,10 @@ extern void tud_vendor_task(void);
       tud_cdc_write_flush();
 		tud_vendor_task();
     }
+#endif
+
+#if USE_DFU_UART
+	dfu_uart_task();
 #endif
 
     if ((m_update_status == BOOTLOADER_COMPLETE) ||

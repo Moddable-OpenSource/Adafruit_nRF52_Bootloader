@@ -13,7 +13,7 @@
 //#define QSPI_XIP_START_ADDR      0x12000000		// in boards.h
 
 
-static void configure_memory(void)
+static void configure_memory(bool writable)
 {
 	uint32_t err_code;
 	uint8_t data;
@@ -25,6 +25,11 @@ static void configure_memory(void)
 		.wipwait	= false, 		// was true - set up for readonly for faster
 		.wren		= false			// was true
 	};
+
+	if (writable) {
+		cinstr_cfg.wipwait = true;
+		cinstr_cfg.wren = true;
+	}
 
 	// Send reset enable
 	err_code = nrfx_qspi_cinstr_xfer(&cinstr_cfg, NULL, NULL);
@@ -51,7 +56,7 @@ static void configure_memory(void)
 //ftdiTrace("qspi memory configured");
 }
 
-void setup_qspi(void)
+void setup_qspi(bool writable)
 {
 	uint32_t err_code;
 
@@ -97,21 +102,55 @@ void setup_qspi(void)
 		//ftdiTraceAndHex("qspi_init fails", err_code);
 
 	// Restart and configure external memory to use quad line mode
-	configure_memory();
+	configure_memory(writable);
 
-/*
-	nrfx_irq_handler_t reset_handler = (nrfx_irq_handler_t)((volatile uint32_t const *)QSPI_XIP_START_ADDR)[1];
-
-
-	SCB->VTOR = QSPI_XIP_START_ADDR;
-
-	// Boot app
-	reset_handler();
-*/
 }
 
+#define FLASH_PAGE_SIZE				4096
+#define FLASH_CACHE_INVALID_ADDR	0xffffffff
+static uint32_t _qsp_addr = FLASH_CACHE_INVALID_ADDR;
+static uint8_t	_qsp_buf[FLASH_PAGE_SIZE] __attribute__((aligned(4)));
+
+void qspi_flush(bool need_erase)
+{
+	uint32_t err_code;
+	if (_qsp_addr == FLASH_CACHE_INVALID_ADDR) return;
+	
+	// skip write if content matches
+	if (memcmp(_qsp_buf, (void*)_qsp_addr, FLASH_PAGE_SIZE) != 0)
+	{
+		if (need_erase) {
+			err_code = nrfx_qspi_erase(NRF_QSPI_ERASE_LEN_4KB, _qsp_addr);
+			if (NRFX_SUCCESS != err_code)
+				return;
+		}
+		err_code = nrfx_qspi_write(_qsp_buf, FLASH_PAGE_SIZE, _qsp_addr);
+		if (NRFX_SUCCESS != err_code)
+			return;
+	}
+
+	_qsp_addr = FLASH_CACHE_INVALID_ADDR;
+
+	while (NRFX_ERROR_BUSY == nrfx_qspi_mem_busy_check())
+	{}
+}
+
+void qspi_write(uint32_t dst, void const *src, int len, bool need_erase)
+{
+	uint32_t newAddr = dst & ~(FLASH_PAGE_SIZE - 1);
+
+	if (newAddr != _qsp_addr)
+	{
+		qspi_flush(need_erase);
+		_qsp_addr = newAddr;
+		memcpy(_qsp_buf, (void*)newAddr, FLASH_PAGE_SIZE);
+	}
+	memcpy(_qsp_buf + (dst & (FLASH_PAGE_SIZE - 1)), src, len);
+}
+
+
 #else
-void setup_qspi(void) {
+void setup_qspi(bool writable) {
 }
 
 #endif
