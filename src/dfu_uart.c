@@ -141,8 +141,8 @@ void dfu_uart_task() {
 
 		sz = 512;
 		app_fifo_read(&ser_rx_fifo, ser_blk_buffer, &sz);
-//		calc = crc16_compute(ser_blk_buffer, 512, NULL);
-		calc = 0x12345678;
+		calc = crc16_compute(ser_blk_buffer, 512, NULL);
+//		calc = 0x12345678;
 		if (check != calc) {
 			serial_write("BAD:check");
 			ser_blk_buffer_amt = 0;
