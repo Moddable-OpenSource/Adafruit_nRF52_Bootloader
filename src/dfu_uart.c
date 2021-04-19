@@ -20,7 +20,7 @@
 extern uint32_t tusb_hal_millis(void);
 extern int write_block(uint32_t block_no, uint8_t *data, WriteState *state);
 
-#define SERIAL_DRAIN_TIME 1000		// 
+#define SERIAL_DRAIN_TIME 100		// 
 
 extern uint32_t *dbl_reset_mem;
 
@@ -31,13 +31,6 @@ static WriteState _serial_wr_state = {0};
 
 static uint8_t ser_blk_buffer[512];
 static uint32_t ser_blk_buffer_amt = 0;
-
-//#define BOOTLOADER_SERIAL_TX_PIN 12
-//#define BOOTLOADER_SERIAL_RX_PIN 7
-//#define BOOTLOADER_SERIAL_BAUDRATE NRF_UART_BAUDRATE_921600
-// #define BOOTLOADER_SERIAL_BAUDRATE NRF_UART_BAUDRATE_115200
-
-// Priority default is 7
 
 nrfx_uart_config_t gUartConfig = NRFX_UART_DEFAULT_CONFIG(DFU_UART_TX_PIN, DFU_UART_RX_PIN);
 
@@ -85,9 +78,6 @@ void setup_uart() {
 static int serial_eat_data(uint8_t *buf, uint32_t len) {
 	int ret;
 	UF2_Block *bl = (UF2_Block*)buf;
-
-	if (bl->blockNo >= 2083)
-		bl->flags = 0x2000;
 
 	ret = write_block(0, ser_blk_buffer, &_serial_wr_state);
 
