@@ -231,7 +231,7 @@ int main(void)
   bootloader_init();
 
 #if USE_DFU_UART
-	_serial_update = ((*dbl_reset_mem) == DFU_MODDABLE_SERIAL_MAGIC) || button_pressed(BUTTON_5);
+	_serial_update = ((*dbl_reset_mem) == DFU_MODDABLE_SERIAL_MAGIC) || button_pressed(BUTTON_4);
 	if (_serial_update)
 		dfu_start = true;
 #endif
