@@ -87,6 +87,9 @@ void usb_teardown(void);
 #include "dfu_qspi.h"
 #include "dfu_uart.h"
 
+#define BOOTLOADER_VERSION	2
+#define BOOTLOADER_VER_MEM	0x200041D0
+
 //--------------------------------------------------------------------+
 //
 //--------------------------------------------------------------------+
@@ -115,7 +118,7 @@ void usb_teardown(void);
 #define DFU_MAGIC_UF2_RESET             0x57
 
 #define DFU_DBL_RESET_MAGIC             0x5A1AD5      // SALADS
-#define DFU_DBL_RESET_APP               0x4ee5677e
+#define DFU_DBL_RESET_APP               0x4ee5677e	// don't wait for dbl click
 #define DFU_DBL_RESET_DELAY             500
 // #define DFU_DBL_RESET_MEM               0x20007F7C
 #define DFU_DBL_RESET_MEM               0x200041FC
@@ -195,6 +198,17 @@ void powerCheck() {
 int main(void)
 {
   PRINTF("Bootloader Start\r\n");
+	int moddable_reset = 0;
+	if ((NRF_POWER->RESETREAS & (1 << 2)) 			// SREQ
+		|| (NRF_POWER->RESETREAS & (1 << 16)) 		// GPIO (called OFF)
+		|| (NRF_POWER->RESETREAS & (1 << 17)) 		// LPCOMP
+		|| (NRF_POWER->RESETREAS & (1 << 20)) 		// VBUS
+		)
+	{
+		moddable_reset = 1;
+	}
+
+	*((uint32_t*)BOOTLOADER_VER_MEM) = BOOTLOADER_VERSION;
 
 //	powerCheck();
 
@@ -254,11 +268,15 @@ int main(void)
   }
 
   /*------------- Determine DFU mode (Serial, OTA, FRESET or normal) -------------*/
+#ifdef BUTTON_DFU
   // DFU button pressed
   dfu_start  = dfu_start || button_pressed(BUTTON_DFU);
+#endif
 
+#ifdef BUTTON_FRESET
   // DFU + FRESET are pressed --> OTA
   _ota_dfu = _ota_dfu  || ( button_pressed(BUTTON_DFU) && button_pressed(BUTTON_FRESET) ) ;
+#endif
 
 //  bool const valid_app = bootloader_app_is_valid();
   bool valid_app = bootloader_app_is_valid();
@@ -279,11 +297,16 @@ int main(void)
 		valid_app = 1;
 	}
 
-  bool const just_start_app = valid_app && !dfu_start && (*dbl_reset_mem) == DFU_DBL_RESET_APP;
+  bool just_start_app = valid_app && !dfu_start && (*dbl_reset_mem) == DFU_DBL_RESET_APP;
 
   if (!just_start_app && APP_ASKS_FOR_SINGLE_TAP_RESET())
     dfu_start = 1;
 
+if (moddable_reset && valid_app )
+	{
+		just_start_app = 1;
+	}
+else
   // App mode: register 1st reset and DFU startup (nrf52832)
   if ( ! (just_start_app || dfu_start || !valid_app) )
   {
@@ -305,7 +328,7 @@ int main(void)
   }
 
   if (APP_ASKS_FOR_SINGLE_TAP_RESET())
-    (*dbl_reset_mem) = DFU_DBL_RESET_APP;
+    (*dbl_reset_mem) = DFU_DBL_RESET_APP; // Just start app
   else
     (*dbl_reset_mem) = 0;
 

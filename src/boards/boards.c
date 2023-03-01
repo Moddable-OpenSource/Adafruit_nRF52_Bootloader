@@ -62,8 +62,12 @@ void board_init(void)
   NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_RC;
   NRF_CLOCK->TASKS_LFCLKSTART = 1UL;
 
+#if defined(BUTTON_DFU)
   button_init(BUTTON_DFU);
+#endif
+#if defined(BUTTON_FRESET)
   button_init(BUTTON_FRESET);
+#endif
 #if defined(BUTTON_5)
   button_init(BUTTON_5);
 #endif

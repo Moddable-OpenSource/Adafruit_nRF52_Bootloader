@@ -37,9 +37,9 @@
 /* BUTTON
  *------------------------------------------------------------------*/
 #define BUTTONS_NUMBER      2
-#define BUTTON_1            11		// encoder switch
-//#define BUTTON_1            13	// side switch
-#define BUTTON_2            24		// random pin
+//#define BUTTON_1            11		// encoder switch
+#define BUTTON_1            13	// side switch
+//#define BUTTON_2            24		// random pin
 #define BUTTON_PULL         NRF_GPIO_PIN_PULLUP
 
 /*------------------------------------------------------------------*/
