@@ -264,6 +264,10 @@ void uf2_init()
     strcat(infoUf2File, "not found\r\n");
   }
 
+#if defined(BOOTLOADER_VER_MEM)
+  uint32_t blv = *((uint32_t*)BOOTLOADER_VER_MEM);
+  sprintf(infoUf2File + strlen(infoUf2File), "Bootloader: Moddable %lu.%lu\r\n", (blv & 0xff00) >> 8, blv & 0xff);
+#endif
   strcat(infoUf2File, "Date: " __DATE__ "\r\n");
 }
 
