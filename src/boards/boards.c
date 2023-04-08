@@ -121,7 +121,7 @@ uint32_t tusb_hal_millis(void)
 
 
 static uint32_t primary_cycle_length = 50;
-static uint32_t g_led_pin = 7;
+static uint32_t g_led_pin = LED_PRIMARY_PIN;
 #ifdef LED_SECONDARY_PIN
 static uint32_t secondary_cycle_length;
 #endif
@@ -129,6 +129,7 @@ static uint32_t secondary_cycle_length;
 void led_init(uint32_t led_index, uint32_t led_pin) {
 	g_led_pin = led_pin;
 	nrf_gpio_cfg_output(led_pin);
+	nrf_gpio_pin_write(led_pin, !LED_STATE_ON);
 }
 
 void led_tick() {
