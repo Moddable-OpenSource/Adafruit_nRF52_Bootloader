@@ -31,16 +31,16 @@
 /* LED
  *------------------------------------------------------------------*/
 #define LEDS_NUMBER         2
-#define LED_PRIMARY_PIN     13
-#define LED_SECONDARY_PIN   14
-#define LED_STATE_ON        0
+#define LED_PRIMARY_PIN     26
+#define LED_SECONDARY_PIN   6
+#define LED_STATE_ON        1
 
 /*------------------------------------------------------------------*/
 /* BUTTON
  *------------------------------------------------------------------*/
 #define BUTTONS_NUMBER      2
-#define BUTTON_1            11
-#define BUTTON_2            12
+#define BUTTON_1            3
+#define BUTTON_2            6
 #define BUTTON_PULL         NRF_GPIO_PIN_PULLUP
 
 /*------------------------------------------------------------------*/
@@ -51,12 +51,12 @@
 #define USE_QSPI		0
 #define USE_DFU_UART	0
 
-#define QSPI_SCK_PIN   		NRF_GPIO_PIN_MAP(1,1)
-#define QSPI_CSN_PIN   		NRF_GPIO_PIN_MAP(1,2)
-#define QSPI_IO0_PIN   		NRF_GPIO_PIN_MAP(1,3)
-#define QSPI_IO1_PIN   		NRF_GPIO_PIN_MAP(1,4)
-#define QSPI_IO2_PIN   		NRF_GPIO_PIN_MAP(1,5)
-#define QSPI_IO3_PIN   		NRF_GPIO_PIN_MAP(1,6)
+#define QSPI_SCK_PIN   		21
+#define QSPI_CSN_PIN   		25
+#define QSPI_IO0_PIN   		20
+#define QSPI_IO1_PIN   		24
+#define QSPI_IO2_PIN   		22
+#define QSPI_IO3_PIN   		23
 
 #define QSPI_XIP_START_ADDR      0x12000000
 
