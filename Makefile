@@ -247,7 +247,6 @@ CFLAGS += \
 	-fshort-enums \
 	-fstack-usage \
 	-fno-strict-aliasing \
-	-Wall \
 	-Wextra \
 	-Werror \
 	-Wfatal-errors \
