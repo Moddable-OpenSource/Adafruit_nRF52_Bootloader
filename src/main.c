@@ -87,7 +87,7 @@ void usb_teardown(void);
 #include "dfu_qspi.h"
 #include "dfu_uart.h"
 
-#define BOOTLOADER_VERSION	0x0006
+#define BOOTLOADER_VERSION	0x0007
 // found in BOOTLOADER_VER_MEM	0x200041D0
 
 //--------------------------------------------------------------------+
