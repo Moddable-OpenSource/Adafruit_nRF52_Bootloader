@@ -70,7 +70,7 @@
 #include "nrfx_nvmc.h"
 
 
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
 #include "nrf_usbd.h"
 #include "tusb.h"
 
@@ -362,7 +362,11 @@ else
     else
     {
       // No timeout if bootloader requires user action (double-reset).
+#if USE_UART_UPDATE
+      APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 10000, true) );
+#else
       APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 0, false) );
+#endif
     }
 
     if ( _ota_dfu )
@@ -547,7 +551,7 @@ uint32_t proc_soc(void)
   {
     pstorage_sys_event_handler(soc_evt);
 
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
     extern void tusb_hal_nrf_power_event(uint32_t event);
     /*------------- usb power event handler -------------*/
     int32_t usbevt = (soc_evt == NRF_EVT_POWER_USB_DETECTED   ) ? NRFX_POWER_USB_EVT_DETECTED:

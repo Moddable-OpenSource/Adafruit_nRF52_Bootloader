@@ -45,7 +45,7 @@
 #include "nrf_error.h"
 
 // nRF has native usb peripheral
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
 #include "tusb.h"
 #endif
 
@@ -122,7 +122,7 @@ static uint32_t send_tx_byte_end(void);
  */
 uint32_t (*send_tx_byte) (void) = send_tx_byte_default;
 
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
 
 static uint32_t serial_put(char ch)
 {
@@ -350,7 +350,7 @@ static bool rx_buffer_overflowed(void)
     return false;
 }
 
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
 
 static uint32_t slip_uart_open(void)
 {
@@ -447,7 +447,7 @@ uint32_t hci_slip_close()
 {
     m_current_state   = SLIP_OFF;
 
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
     return NRF_SUCCESS;
 #else
     uint32_t err_code = app_uart_close();

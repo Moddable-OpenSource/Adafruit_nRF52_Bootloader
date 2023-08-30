@@ -32,7 +32,7 @@
 
 #include "boards.h"
 
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
 #include "tusb.h"
 #endif
 extern void dfu_uart_task(void);
@@ -81,7 +81,7 @@ static void pstorage_callback_handler(pstorage_handle_t * p_handle,
  */
 static void dfu_startup_timer_handler(void * p_context)
 {
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
   if (m_cancel_timeout_on_usb && tud_mounted())
   {
     return;
@@ -125,7 +125,7 @@ static void wait_for_events(void)
     // Event received. Process it from the scheduler.
     app_sched_execute();
 
-#ifdef NRF_USBD
+#if !USE_UART_UPDATE && defined(NRF_USBD)
 extern void tud_vendor_task(void);
     // skip if usb is not inited ( e.g OTA / finializing sd/bootloader )
     if ( tusb_inited() )

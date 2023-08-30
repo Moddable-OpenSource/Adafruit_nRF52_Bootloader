@@ -114,7 +114,6 @@ C_SRC += $(wildcard src/boards/$(BOARD)/*.c)
 # nrfx
 C_SRC += $(NRFX_PATH)/drivers/src/nrfx_power.c
 C_SRC += $(NRFX_PATH)/drivers/src/nrfx_nvmc.c
-C_SRC += $(NRFX_PATH)/drivers/src/nrfx_uart.c
 C_SRC += $(NRFX_PATH)/mdk/system_$(MCU_SUB_VARIANT).c
 
 # qspi
@@ -143,7 +142,11 @@ C_SRC += $(SDK_PATH)/libraries/hci/hci_transport.c
 C_SRC += $(SDK_PATH)/libraries/util/nrf_assert.c
 
 # UART or USB Serial
-ifeq ($(MCU_SUB_VARIANT),nrf52)
+# add serial support if specified
+
+ifeq ($(SERIAL_DFU),1)
+
+CFLAGS += -DUSE_UART_UPDATE=1
 
 C_SRC += $(SDK_PATH)/libraries/uart/app_uart.c
 C_SRC += $(SDK_PATH)/drivers_nrf/uart/nrf_drv_uart.c
@@ -154,6 +157,10 @@ IPATH += $(SDK_PATH)/drivers_nrf/common
 IPATH += $(SDK_PATH)/drivers_nrf/uart
 
 else
+
+CFLAGS += -DUSE_UART_UPDATE=0
+
+C_SRC += $(NRFX_PATH)/drivers/src/nrfx_uart.c
 
 # USB Application ( MSC + UF2 )
 C_SRC += $(wildcard src/fifo/*.c)
@@ -224,11 +231,13 @@ IPATH += $(SD_PATH)/$(SD_FILENAME)_API/include/nrf52
 
 # Debug option use RTT for printf
 ifeq ($(DEBUG), 1)
-	RTT_SRC = lib/SEGGER_RTT
+	CFLAGS += -ggdb
+
+#	RTT_SRC = lib/SEGGER_RTT
 	
-	CFLAGS += -ggdb -DCFG_DEBUG -DSEGGER_RTT_MODE_DEFAULT=SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
-	IPATH += $(RTT_SRC)/RTT
-  C_SRC += $(RTT_SRC)/RTT/SEGGER_RTT.c
+#	CFLAGS += -ggdb -DCFG_DEBUG -DSEGGER_RTT_MODE_DEFAULT=SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
+#	IPATH += $(RTT_SRC)/RTT
+#  C_SRC += $(RTT_SRC)/RTT/SEGGER_RTT.c
 endif
 
 #flags common to all targets
