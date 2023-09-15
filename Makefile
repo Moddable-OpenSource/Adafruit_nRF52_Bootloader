@@ -51,13 +51,16 @@ NRFUTIL = adafruit-nrfutil
 NRFJPROG = nrfjprog
 
 # Set make directory command, Windows tries to create a directory named "-p" if that flag is there.
-ifneq ($(OS), Windows_NT)
-  MK = mkdir -p
-else
+#ifneq ($(OS), Windows_NT)
+#  MK = mkdir -p
+#else
   MK = mkdir
-endif
-
+#endif
+ifneq ($(OS), Windows_NT)
+RM = rm /S /Q
+else
 RM = rm -rf
+endif
 
 # auto-detect BMP on macOS, otherwise have to specify
 BMP_PORT ?= $(shell ls -1 /dev/cu.usbmodem????????1 | head -1)
