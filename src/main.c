@@ -363,7 +363,7 @@ else
     {
       // No timeout if bootloader requires user action (double-reset).
 #if USE_UART_UPDATE
-      APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 10000, true) );
+      APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 30000, true) );
 #else
       APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 0, false) );
 #endif
