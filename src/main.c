@@ -87,7 +87,7 @@ void usb_teardown(void);
 #include "dfu_qspi.h"
 #include "dfu_uart.h"
 
-#define BOOTLOADER_VERSION	0x0007
+#define BOOTLOADER_VERSION	0x0800
 // found in BOOTLOADER_VER_MEM	0x200041D0
 
 //--------------------------------------------------------------------+
@@ -126,6 +126,7 @@ void usb_teardown(void);
 #define DFU_MODDABLE_MAGIC              0xbeefcafe
 #define DFU_MODDABLE_VENDOR_MAGIC       0xf00dcafe
 //#define DFU_MODDABLE_SERIAL_MAGIC       0x347f00d5
+#define DFU_MODDABLE_OTA_MAGIC			0xfeed1cee
 
 #define BOOTLOADER_VERSION_REGISTER     NRF_TIMER2->CC[0]
 #define DFU_SERIAL_STARTUP_INTERVAL     1000
@@ -221,7 +222,7 @@ int main(void)
   bool sd_inited = (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_APPJUM);
 
   // Start Bootloader in BLE OTA mode
-  _ota_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_APPJUM) || (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_RESET);
+  _ota_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_APPJUM) || (NRF_POWER->GPREGRET == DFU_MAGIC_OTA_RESET) || ((*dbl_reset_mem) == DFU_MODDABLE_OTA_MAGIC);
 
   // Serial only mode
 //  bool serial_only_dfu = (NRF_POWER->GPREGRET == DFU_MAGIC_SERIAL_ONLY_RESET);
@@ -270,7 +271,8 @@ int main(void)
   /*------------- Determine DFU mode (Serial, OTA, FRESET or normal) -------------*/
 #ifdef BUTTON_DFU
   // DFU button pressed
-  dfu_start  = dfu_start || button_pressed(BUTTON_DFU);
+  _ota_dfu = _ota_dfu || button_pressed(BUTTON_DFU);
+  dfu_start  = dfu_start || _ota_dfu;
 #endif
 
 #ifdef BUTTON_FRESET
@@ -363,7 +365,7 @@ else
     {
       // No timeout if bootloader requires user action (double-reset).
 #if USE_UART_UPDATE
-      APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 30000, true) );
+      APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 300000, true) );		// 5 minutes
 #else
       APP_ERROR_CHECK( bootloader_dfu_start(_ota_dfu, 0, false) );
 #endif

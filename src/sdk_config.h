@@ -65,8 +65,8 @@
 //==========================================================
 #define HCI_MEM_POOL_ENABLED               1
 #define HCI_TX_BUF_SIZE                    600 // not used
-#define HCI_RX_BUF_SIZE                    600
-#define HCI_RX_BUF_QUEUE_SIZE              8   // must be power of 2
+#define HCI_RX_BUF_SIZE                    600	//600
+#define HCI_RX_BUF_QUEUE_SIZE              16	//8   // must be power of 2
 
 //==========================================================
 // <e> UART_ENABLED - nrf_drv_uart - UART/UARTE peripheral driver
@@ -136,6 +136,12 @@
 #define NRF_STRERROR_ENABLED               1
 
 #define APP_FIFO_ENABLED		1
+
+// Attempt to make BLE DFU quicker
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 247
+#define NRF_SDH_BLE_GAP_DATA_LENGTH 251
+
+
 
 #endif //SDK_CONFIG_H
 

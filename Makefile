@@ -51,15 +51,12 @@ NRFUTIL = adafruit-nrfutil
 NRFJPROG = nrfjprog
 
 # Set make directory command, Windows tries to create a directory named "-p" if that flag is there.
-# ifneq ($(OS), Windows_NT)
-#   MK = mkdir -p
-# else
-  MK = mkdir
-# endif
 ifneq ($(OS), Windows_NT)
-RM = rm /S /Q
+	RM = rm -rf
+	MK = mkdir -p
 else
-RM = rm -rf
+	RM = rm /S /Q
+	MK = mkdir
 endif
 
 # auto-detect BMP on macOS, otherwise have to specify
@@ -235,12 +232,15 @@ IPATH += $(SD_PATH)/$(SD_FILENAME)_API/include/nrf52
 # Debug option use RTT for printf
 ifeq ($(DEBUG), 1)
 	CFLAGS += -ggdb
+	USE_RTT = 1
+endif
 
-#	RTT_SRC = lib/SEGGER_RTT
+ifeq ($(USE_RTT), 1)
+	RTT_SRC = lib/SEGGER_RTT
 	
-#	CFLAGS += -ggdb -DCFG_DEBUG -DSEGGER_RTT_MODE_DEFAULT=SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
-#	IPATH += $(RTT_SRC)/RTT
-#  C_SRC += $(RTT_SRC)/RTT/SEGGER_RTT.c
+	CFLAGS += -ggdb -DCFG_DEBUG -DSEGGER_RTT_MODE_DEFAULT=SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL
+	IPATH += $(RTT_SRC)/RTT
+	C_SRC += $(RTT_SRC)/RTT/SEGGER_RTT.c
 endif
 
 #flags common to all targets

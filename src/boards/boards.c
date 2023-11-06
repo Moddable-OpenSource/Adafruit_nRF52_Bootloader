@@ -33,6 +33,7 @@
 #define SCHED_QUEUE_SIZE                    30                               /**< Maximum number of events in the scheduler queue. */
 
 void led_init(uint32_t led_index, uint32_t led_pin);
+void led_terminate();
 
 //------------- IMPLEMENTATION -------------//
 void button_init(uint32_t pin)
@@ -55,6 +56,8 @@ bool button_pressed(uint32_t pin)
 
 void board_init(void)
 {
+  led_terminate();
+
   // stop LF clock just in case we jump from application without reset
   NRF_CLOCK->TASKS_LFCLKSTOP = 1UL;
 
@@ -130,6 +133,15 @@ void led_init(uint32_t led_index, uint32_t led_pin) {
 	g_led_pin = led_pin;
 	nrf_gpio_cfg_output(led_pin);
 	nrf_gpio_pin_write(led_pin, !LED_STATE_ON);
+}
+
+void led_terminate() {
+#ifdef LED_PRIMARY_PIN
+	nrf_gpio_pin_write(LED_PRIMARY_PIN, !LED_STATE_ON);
+#endif
+#ifdef LED_SECONDARY_PIN
+	nrf_gpio_pin_write(LED_SECONDARY_PIN, !LED_STATE_ON);
+#endif
 }
 
 void led_tick() {
