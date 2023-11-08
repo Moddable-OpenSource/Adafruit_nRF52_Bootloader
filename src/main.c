@@ -87,7 +87,7 @@ void usb_teardown(void);
 #include "dfu_qspi.h"
 #include "dfu_uart.h"
 
-#define BOOTLOADER_VERSION	0x0800
+#define BOOTLOADER_VERSION	0x0801
 // found in BOOTLOADER_VER_MEM	0x200041D0
 
 //--------------------------------------------------------------------+
@@ -96,11 +96,9 @@ void usb_teardown(void);
 
 /*
  * Blinking patterns:
- * - DFU Serial     : LED Status blink
- * - DFU OTA        : LED Status & Conn blink at the same time
- * - DFU Flashing   : LED Status blink 2x fast
- * - Factory Reset  : LED Status blink 2x fast
- * - Fatal Error    : LED Status & Conn blink one after another
+ * - DFU Serial/USB : LED Status blink 500ms
+ * - DFU OTA        : LED Status double-blink
+ * - DFU Flashing   : LED Status fast, irregular blink
  */
 
 /* Magic that written to NRF_POWER->GPREGRET by application when it wish to go into DFU
@@ -283,21 +281,10 @@ int main(void)
 //  bool const valid_app = bootloader_app_is_valid();
   bool valid_app = bootloader_app_is_valid();
 
-	if (!valid_app) {
-		bootloader_settings_t myBST;
-		myBST.bank_0 = 1;
-		myBST.bank_0_crc = 0;
-		myBST.bank_0_size = 0;
-		myBST.bank_1 = 255;
-		myBST.sd_image_size = 0;
-		myBST.bl_image_size = 0;
-		myBST.app_image_size = 0;
-		myBST.sd_image_start = 0;
-
-		mySaveBL(&myBST);
-
-		valid_app = 1;
-	}
+	bootloader_settings_t myBST;
+	bootloader_settings_get(&myBST);
+	if (myBST.bank_1 == BANK_OTA_DFU_STARTED)
+		_ota_dfu = 1;
 
   bool just_start_app = valid_app && !dfu_start && (*dbl_reset_mem) == DFU_DBL_RESET_APP;
 
@@ -352,7 +339,9 @@ else
 		}
 		else
 #endif
+		{
    		   usb_init(serial_only_dfu);
+		}
     }
 
     // Initiate an update of the firmware.

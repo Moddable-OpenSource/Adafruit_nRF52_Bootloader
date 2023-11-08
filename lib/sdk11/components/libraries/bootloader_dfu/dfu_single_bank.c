@@ -140,6 +140,10 @@ static void dfu_prepare_func_app_erase(uint32_t image_size)
 
   if ( is_ota() )
   {
+    dfu_update_status_t update_status = { 0 };
+    update_status.status_code = DFU_START_BANK_0_ERASE;
+    bootloader_dfu_update_process(update_status);
+
     uint32_t err_code = pstorage_clear(&m_storage_handle_app, m_image_size);
     APP_ERROR_CHECK(err_code);
   }

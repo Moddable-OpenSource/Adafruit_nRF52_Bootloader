@@ -296,6 +296,13 @@ void bootloader_dfu_update_process(dfu_update_status_t update_status)
 
         m_update_status = BOOTLOADER_TIMEOUT;
     }
+    else if (update_status.status_code == DFU_START_BANK_0_ERASE)
+    {
+        settings.bank_0      = BANK_INVALID_APP;
+        settings.bank_1      = BANK_OTA_DFU_STARTED;
+
+        bootloader_settings_save(&settings);
+    }
     else if (update_status.status_code == DFU_BANK_0_ERASED)
     {
         settings.bank_0_crc  = 0;

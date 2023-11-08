@@ -36,6 +36,7 @@ typedef enum
     BANK_VALID_APP   = 0x01,
     BANK_VALID_SD    = 0xA5,
     BANK_VALID_BOOT  = 0xAA,
+    BANK_OTA_DFU_STARTED   = 0xFD,
     BANK_ERASED      = 0xFE,
     BANK_INVALID_APP = 0xFF,
 } bootloader_bank_code_t;

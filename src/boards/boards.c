@@ -123,11 +123,7 @@ uint32_t tusb_hal_millis(void)
 }
 
 
-static uint32_t primary_cycle_length = 50;
 static uint32_t g_led_pin = LED_PRIMARY_PIN;
-#ifdef LED_SECONDARY_PIN
-static uint32_t secondary_cycle_length;
-#endif
 
 void led_init(uint32_t led_index, uint32_t led_pin) {
 	g_led_pin = led_pin;
@@ -144,15 +140,21 @@ void led_terminate() {
 #endif
 }
 
-void led_tick() {
-	static uint32_t lastMillis = 0;
-	static uint32_t lastState = 1;
-    uint32_t millis = _systick_count;
+static uint32_t ledCycle = 0;
+static uint32_t ledNext = 0;
+static uint32_t ledDelays[4] = { 500, 500, 500, 500 };
+#define setLEDDelays(a, b, c, d) {	\
+	ledDelays[0] = a; \
+	ledDelays[1] = b; \
+	ledDelays[2] = c; \
+	ledDelays[3] = d; }
 
-	if (millis - lastMillis >= primary_cycle_length) {
-  		nrf_gpio_pin_write(g_led_pin, lastState);
-		lastMillis = millis;
-		lastState = !lastState;
+void led_tick() {
+	if (_systick_count > ledNext) {
+		ledNext += ledDelays[ledCycle++];
+		if (ledCycle > 3)
+			ledCycle = 0;
+		nrf_gpio_pin_write(g_led_pin, ledCycle % 2);
 	}
 }
 
@@ -160,37 +162,28 @@ void led_state(uint32_t state)
 {
     switch (state) {
         case STATE_USB_MOUNTED:
-          primary_cycle_length = 500;
+			setLEDDelays(500, 500, 500, 500);
           break;
 
         case STATE_BOOTLOADER_STARTED:
         case STATE_USB_UNMOUNTED:
-          primary_cycle_length = 700;
+			setLEDDelays(700, 500, 700, 500);
           break;
 
         case STATE_WRITING_STARTED:
-          primary_cycle_length = 30;
+			setLEDDelays(30, 100, 50, 100);
           break;
 
         case STATE_WRITING_FINISHED:
-          // Empty means to unset any temp colors.
-          primary_cycle_length = 500;
+			setLEDDelays(500, 500, 500, 500);
           break;
 
         case STATE_BLE_CONNECTED:
-          #ifdef LED_SECONDARY_PIN
-          secondary_cycle_length = 500;
-          #else
-          primary_cycle_length = 200;
-          #endif
+			setLEDDelays(50, 50, 50, 750);
           break;
 
         case STATE_BLE_DISCONNECTED:
-          #ifdef LED_SECONDARY_PIN
-          secondary_cycle_length = 300;
-          #else
-          primary_cycle_length = 700;
-          #endif
+			setLEDDelays(50, 50, 50, 250);
           break;
 
         default:
