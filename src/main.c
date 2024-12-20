@@ -87,7 +87,7 @@ void usb_teardown(void);
 #include "dfu_qspi.h"
 #include "dfu_uart.h"
 
-#define BOOTLOADER_VERSION	0x0801
+#define BOOTLOADER_VERSION	0x0802
 // found in BOOTLOADER_VER_MEM	0x200041D0
 
 //--------------------------------------------------------------------+
@@ -399,7 +399,7 @@ else
     bootloader_app_start();
   }
 
-  NVIC_SystemReset();
+//  NVIC_SystemReset();
 }
 
 /**

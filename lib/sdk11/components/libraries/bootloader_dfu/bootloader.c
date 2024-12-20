@@ -144,6 +144,15 @@ extern void tud_vendor_task(void);
         (m_update_status == BOOTLOADER_TIMEOUT) ||
         (m_update_status == BOOTLOADER_RESET) )
     {
+extern uint32_t tusb_hal_millis(void);
+		if (m_update_status == BOOTLOADER_COMPLETE) {
+			static uint32_t finishedTime = 0;
+			if (finishedTime == 0)
+				finishedTime = tusb_hal_millis() + 500;
+			if (tusb_hal_millis() > finishedTime)
+				return;
+		}
+		else
       // When update has completed or a timeout/reset occured we will return.
       return;
     }
