@@ -108,7 +108,7 @@ void board_teardown(void)
   NRF_CLOCK->TASKS_LFCLKSTOP = 1UL;
 }
 
-static uint32_t _systick_count = 0;
+uint32_t _systick_count = 0;
 void SysTick_Handler(void)
 {
   _systick_count++;
